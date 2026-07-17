@@ -5,6 +5,10 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   PatientHome: undefined;
+  PatientProfile: undefined;
+  PatientAppointments: { upcomingOnly?: boolean } | undefined;
+  BookAppointment: undefined;
+  AllDoctors: undefined;
   DoctorHome: undefined;
 };
 

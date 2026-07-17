@@ -15,6 +15,13 @@ const AppointmentSchema: Schema = new Schema(
     },
     tokenNumber: { type: String, required: true },
     notes: { type: String },
+    patientSnapshot: {
+      name: { type: String },
+      email: { type: String },
+      phone: { type: String },
+      age: { type: Number },
+      bloodGroup: { type: String }
+    }
   },
   { timestamps: true }
 );

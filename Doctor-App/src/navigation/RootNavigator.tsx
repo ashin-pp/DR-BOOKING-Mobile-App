@@ -1,17 +1,23 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, ActivityIndicator, Text } from 'react-native';
+import { View, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
+import { PatientHomeScreen } from '../screens/PatientHomeScreen';
+import { PatientProfileScreen } from '../screens/PatientProfileScreen';
+import { BookAppointmentScreen } from '../screens/BookAppointmentScreen';
+import { PatientAppointmentsScreen } from '../screens/PatientAppointmentsScreen';
+import { AllDoctorsScreen } from '../screens/AllDoctorsScreen';
+import { DoctorHomeScreen } from '../screens/DoctorHomeScreen';
+import { DoctorProfileScreen } from '../screens/DoctorProfileScreen';
+import { DoctorAppointmentsScreen } from '../screens/DoctorAppointmentsScreen';
+import { DoctorAnalyticsScreen } from '../screens/DoctorAnalyticsScreen';
 import { UserRole } from '../constants/enums';
-
-// Placeholders for Phase 3 and 4
-const PatientHome = () => <View className="flex-1 items-center justify-center bg-[#F5F7F6]"><Text className="text-[#122827] text-lg font-bold">Patient Home</Text></View>;
-const DoctorHome = () => <View className="flex-1 items-center justify-center bg-[#F5F7F6]"><Text className="text-[#122827] text-lg font-bold">Doctor Home</Text></View>;
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +30,15 @@ export const RootNavigator = () => {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#F5F7F6] items-center justify-center">
+      <View className="flex-1 justify-center items-center bg-[#F5F7F6]">
+        {/* Custom Aarohcare Logo Loader */}
+        <View className="items-center mb-8">
+          <View className="w-16 h-16 rounded-full border-[2.5px] border-[#122827] items-center justify-center mb-4 bg-white/50" style={{ elevation: 5, shadowColor: '#122827', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
+            <MaterialCommunityIcons name="stethoscope" size={36} color="#122827" />
+          </View>
+          <Text className="text-[#122827] text-3xl font-black tracking-tighter">Aarohcare</Text>
+          <Text className="text-[#5F7371] text-[10px] font-bold tracking-[3px] uppercase mt-1">Elite Medical Wellness</Text>
+        </View>
         <ActivityIndicator size="large" color="#246E66" />
       </View>
     );
@@ -42,10 +56,21 @@ export const RootNavigator = () => {
           </>
         ) : user?.role === UserRole.DOCTOR ? (
           // Doctor Stack
-          <Stack.Screen name="DoctorHome" component={DoctorHome} />
+          <>
+            <Stack.Screen name="DoctorHome" component={DoctorHomeScreen} />
+            <Stack.Screen name="DoctorProfile" component={DoctorProfileScreen} />
+            <Stack.Screen name="DoctorAppointments" component={DoctorAppointmentsScreen} />
+            <Stack.Screen name="DoctorAnalytics" component={DoctorAnalyticsScreen} />
+          </>
         ) : (
           // Patient Stack
-          <Stack.Screen name="PatientHome" component={PatientHome} />
+          <>
+            <Stack.Screen name="PatientHome" component={PatientHomeScreen} />
+            <Stack.Screen name="PatientProfile" component={PatientProfileScreen} />
+            <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+            <Stack.Screen name="PatientAppointments" component={PatientAppointmentsScreen} />
+            <Stack.Screen name="AllDoctors" component={AllDoctorsScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

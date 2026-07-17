@@ -4,9 +4,12 @@ import { UserRole, AppointmentStatus } from '../constants/enums';
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  password: string;
   role: UserRole;
   phone?: string;
+  age?: number;
+  bloodGroup?: string;
+  profileImage?: string;
   specialization?: string;
   experience?: number;
   consultationFee?: number;
@@ -27,6 +30,31 @@ export interface IAppointment extends Document {
   status: AppointmentStatus;
   tokenNumber: string;
   notes?: string;
+  patientSnapshot?: {
+    name: string;
+    email: string;
+    phone?: string;
+    age?: number;
+    bloodGroup?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ISlot {
+  time: string;
+  isBooked: boolean;
+  patientId?: Types.ObjectId;
+}
+
+export interface ISchedule extends Document {
+  doctorId: Types.ObjectId;
+  date: string;
+  startTime: string;
+  endTime: string;
+  slotDurationMinutes: number;
+  totalTokens: number;
+  slots: ISlot[];
   createdAt: Date;
   updatedAt: Date;
 }

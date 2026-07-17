@@ -6,9 +6,12 @@ const UserSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    passwordHash: { type: String, required: true },
+    password: { type: String, required: true },
     role: { type: String, enum: Object.values(UserRole), default: UserRole.PATIENT },
     phone: { type: String },
+    age: { type: Number },
+    bloodGroup: { type: String },
+    profileImage: { type: String },
     
     // Doctor Specific
     specialization: { type: String },
@@ -26,7 +29,7 @@ const UserSchema: Schema = new Schema(
 // Prevent returning passwordHash in JSON
 UserSchema.set('toJSON', {
   transform: (doc, ret) => {
-    delete ret.passwordHash;
+    delete ret.password;
     return ret;
   },
 });

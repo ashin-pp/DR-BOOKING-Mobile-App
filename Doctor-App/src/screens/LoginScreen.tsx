@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { apiClient } from '../api/client';
+import { authService } from '../api/authService';
 import { useAuthStore } from '../store/authStore';
 import { NavigationProps } from '../types/navigation.types';
 
@@ -15,20 +17,41 @@ export const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{email?: string, password?: string}>({});
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+    // Reset errors
+    setErrors({});
+    let newErrors: any = {};
+    if (!email) newErrors.email = 'Email is required';
+    if (!password) newErrors.password = 'Password is required';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     setLoading(true);
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
-      await setAuth(response.data.token, response.data.user);
-      Alert.alert('Success', 'Logged in successfully');
+      const response = await authService.login({ email, password });
+      await setAuth(response.data.token, response.data.refreshToken, response.data.user);
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome Back! 👋',
+        text2: 'You have logged in successfully.',
+        position: 'top',
+        topOffset: 60,
+      });
     } catch (error: any) {
-      Alert.alert('Login Failed', error.response?.data?.error || 'An error occurred');
+      console.log('Login Error Details:', error.response?.data || error.message || error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'An error occurred';
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: errorMessage,
+        position: 'top',
+        topOffset: 60,
+      });
     } finally {
       setLoading(false);
     }
@@ -40,13 +63,15 @@ export const LoginScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24, justifyContent: 'center' }}>
-          
-          <TouchableOpacity onPress={() => navigation.goBack()} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm shadow-[#122827]/10">
+        <View className="px-6 pt-4 pb-2 z-10">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm shadow-[#122827]/10 border border-[#E6F0EE]">
             <Feather name="arrow-left" size={20} color="#122827" />
           </TouchableOpacity>
+        </View>
 
-          <View className="items-center mb-10 mt-8">
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 24, justifyContent: 'center' }}>
+          
+          <View className="items-center mb-8">
             <View className="w-16 h-16 rounded-full border-[1.5px] border-[#122827] items-center justify-center mb-6">
               <MaterialCommunityIcons name="leaf" size={32} color="#122827" />
             </View>
@@ -63,14 +88,16 @@ export const LoginScreen = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => { setEmail(text); setErrors(e => ({...e, email: undefined})); }}
+              error={errors.email}
             />
             <Input
               label="Password"
               placeholder="Enter your password"
-              secureTextEntry
+              isPassword
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => { setPassword(text); setErrors(e => ({...e, password: undefined})); }}
+              error={errors.password}
             />
             
             <TouchableOpacity className="items-end mt-2 mb-6">

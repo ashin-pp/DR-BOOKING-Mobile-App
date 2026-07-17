@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { apiClient } from '../api/client';
+import { authService } from '../api/authService';
 import { useAuthStore } from '../store/authStore';
 import { NavigationProps } from '../types/navigation.types';
 import { UserRole } from '../constants/enums';
+import { SPECIALIZATIONS } from '../constants/specializations';
 
 export const RegisterScreen = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -17,18 +19,33 @@ export const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [specialization, setSpecialization] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<any>({});
+
+  const filteredSpecializations = SPECIALIZATIONS.filter(s => 
+    s.toLowerCase().includes(specialization.toLowerCase()) && s !== specialization
+  );
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
+    setErrors({});
+    let newErrors: any = {};
+
+    if (!name) newErrors.name = 'Name is required';
+    if (!email) newErrors.email = 'Email is required';
+    if (!password) newErrors.password = 'Password is required';
+    if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    
+    if (role === UserRole.DOCTOR && !specialization) {
+      newErrors.specialization = 'Specialization is required';
     }
 
-    if (role === UserRole.DOCTOR && !specialization) {
-      Alert.alert('Error', 'Please enter your specialization');
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -39,11 +56,13 @@ export const RegisterScreen = () => {
         payload.specialization = specialization;
       }
 
-      const response = await apiClient.post('/auth/register', payload);
-      await setAuth(response.data.token, response.data.user);
+      const response = await authService.register(payload);
+      await setAuth(response.data.token, response.data.refreshToken, response.data.user);
       Alert.alert('Success', 'Account created successfully');
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.response?.data?.error || 'An error occurred');
+      console.log('Registration Error Details:', error.response?.data || error.message || error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'An error occurred';
+      Alert.alert('Registration Failed', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,13 +74,15 @@ export const RegisterScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24, justifyContent: 'center' }}>
-          
-          <TouchableOpacity onPress={() => navigation.goBack()} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm shadow-[#122827]/10">
+        <View className="px-6 pt-4 pb-2 z-10">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm shadow-[#122827]/10 border border-[#E6F0EE]">
             <Feather name="arrow-left" size={20} color="#122827" />
           </TouchableOpacity>
+        </View>
 
-          <View className="items-center mb-8 mt-8">
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 24, justifyContent: 'center' }}>
+          
+          <View className="items-center mb-6">
             <View className="w-14 h-14 rounded-full border-[1.5px] border-[#122827] items-center justify-center mb-4">
               <MaterialCommunityIcons name="leaf" size={26} color="#122827" />
             </View>
@@ -90,15 +111,47 @@ export const RegisterScreen = () => {
             </View>
 
             <View className="space-y-1">
-              <Input label="Full Name" placeholder="John Doe" value={name} onChangeText={setName} />
-              <Input label="Email Address" placeholder="john@example.com" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+              <Input label="Full Name" placeholder="John Doe" value={name} onChangeText={(t) => {setName(t); setErrors((e:any)=>({...e, name:undefined}))}} error={errors.name} />
+              <Input label="Email Address" placeholder="john@example.com" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={(t) => {setEmail(t); setErrors((e:any)=>({...e, email:undefined}))}} error={errors.email} />
               <Input label="Phone Number" placeholder="+1 (555) 000-0000" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
               
               {role === UserRole.DOCTOR && (
-                <Input label="Specialization" placeholder="e.g. Cardiologist" value={specialization} onChangeText={setSpecialization} />
+                <View className="z-10 relative">
+                  <Input 
+                    label="Specialization" 
+                    placeholder="e.g. Cardiologist" 
+                    value={specialization} 
+                    onChangeText={(t) => {
+                      setSpecialization(t); 
+                      setShowSuggestions(true);
+                      setErrors((e:any)=>({...e, specialization:undefined}));
+                    }} 
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    error={errors.specialization} 
+                  />
+                  {showSuggestions && specialization.length > 0 && filteredSpecializations.length > 0 && (
+                    <View className="bg-white border border-[#E6F0EE] rounded-[16px] mb-4 overflow-hidden -mt-2" style={{ elevation: 5, shadowColor: '#122827', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10 }}>
+                      <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }}>
+                        {filteredSpecializations.map((spec, index) => (
+                          <TouchableOpacity 
+                            key={index}
+                            onPress={() => {
+                              setSpecialization(spec);
+                              setShowSuggestions(false);
+                            }}
+                            className={`px-4 py-3 ${index !== filteredSpecializations.length - 1 ? 'border-b border-[#F5F7F6]' : ''}`}
+                          >
+                            <Text className="text-[#122827] font-bold text-sm">{spec}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
+                </View>
               )}
 
-              <Input label="Password" placeholder="Create a strong password" secureTextEntry value={password} onChangeText={setPassword} marginBottom={false} />
+              <Input label="Password" placeholder="Create a strong password" isPassword value={password} onChangeText={(t) => {setPassword(t); setErrors((e:any)=>({...e, password:undefined}))}} error={errors.password} />
+              <Input label="Confirm Password" placeholder="Repeat your password" isPassword value={confirmPassword} onChangeText={(t) => {setConfirmPassword(t); setErrors((e:any)=>({...e, confirmPassword:undefined}))}} error={errors.confirmPassword} marginBottom={false} />
             </View>
 
             <View className="mt-8">

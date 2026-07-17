@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { bookAppointment, getUserAppointments } from '../controllers/appointmentController';
+import { bookAppointment, getUserAppointments, updateStatus } from '../controllers/appointmentController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -9,5 +9,7 @@ router.use(protect);
 
 router.post('/book', bookAppointment);
 router.get('/', getUserAppointments); // Returns patient's or doctor's appts based on token role
+router.get('/doctor', getUserAppointments); // Alias for cached apps
+router.patch('/:id/status', updateStatus);
 
 export default router;
