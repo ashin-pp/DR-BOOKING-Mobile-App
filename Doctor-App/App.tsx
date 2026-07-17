@@ -1,6 +1,7 @@
 import 'react-native-screens';
 import React from 'react';
 import { View, Text } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import Toast from 'react-native-toast-message';
@@ -36,8 +37,6 @@ const toastConfig = {
     </View>
   )
 };
-
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
