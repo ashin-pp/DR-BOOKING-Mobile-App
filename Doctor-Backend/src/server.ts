@@ -28,6 +28,14 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Doctor Booking Backend is running!');
 });
 
+app.get('/api/health', (req: Request, res: Response) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Database Connection
 const connectDB = async () => {
   try {
