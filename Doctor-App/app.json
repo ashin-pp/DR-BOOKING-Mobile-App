@@ -19,13 +19,19 @@
         "backgroundColor": "#122827",
         "foregroundImage": "./assets/icon.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ashinnn.DoctorAppDev2"
     },
     "web": {
       "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "15a90d27-850a-446a-aa95-328cd0a1af54"
+      }
+    }
   }
 }
