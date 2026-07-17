@@ -1,3 +1,4 @@
+import 'react-native-screens';
 import React from 'react';
 import { View, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -36,12 +37,14 @@ const toastConfig = {
   )
 };
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 export default function App() {
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style="light" />
       <RootNavigator />
       <Toast config={toastConfig} />
-    </>
+    </SafeAreaProvider>
   );
 }
