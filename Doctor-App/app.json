@@ -4,10 +4,10 @@
     "slug": "Doctor-App-Dev2",
     "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#122827"
     },
@@ -17,19 +17,20 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#122827",
-        "foregroundImage": "./assets/icon.png"
+        "foregroundImage": "./assets/icon.jpg"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.ashinnn.DoctorAppDev2"
     },
     "web": {
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/icon.jpg"
     },
     "newArchEnabled": false,
     "plugins": [
       "expo-secure-store",
       "expo-image-picker",
-      "expo-asset"
+      "expo-asset",
+      "expo-font"
     ],
     "extra": {
       "eas": {
