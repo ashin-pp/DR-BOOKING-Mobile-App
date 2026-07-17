@@ -7,6 +7,11 @@ export interface User {
   role: UserRole;
   phone?: string;
   specialization?: string;
+  age?: number;
+  bloodGroup?: string;
+  profileImage?: string;
+  address?: string;
+  gender?: string;
 }
 
 export interface AuthState {

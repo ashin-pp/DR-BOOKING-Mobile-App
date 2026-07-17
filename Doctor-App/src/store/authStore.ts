@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (refreshToken && userStr) {
         // Try to get a new access token
         try {
-          const response = await fetch('http://192.168.1.34:5000/api/auth/refresh', {
+          const response = await fetch('https://dr-booking-backend-qzs4.onrender.com/api/auth/refresh', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
